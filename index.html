@@ -599,6 +599,12 @@
         return "negative";
       }
 
+      function overallBandLabel() {
+        if (state.score.overall >= 8) return "Best";
+        if (state.score.overall >= 5) return "Balanced";
+        return "Worst";
+      }
+
       function renderDebug() {
         const historyMarkup = state.history.length
           ? `<ol>${state.history.map((item) => `<li>${item.stage}: ${item.answer}</li>`).join("")}</ol>`
@@ -606,7 +612,7 @@
 
         debugPanel.innerHTML = `
           <div class="score-grid">
-            <strong>Overall</strong><span>${state.score.overall}</span>
+            <strong>Overall</strong><span>${state.score.overall} (${overallBandLabel()})</span>
             <strong>Food Waste</strong><span>${state.score.foodWaste}</span>
             <strong>Emissions</strong><span>${state.score.emissions}</span>
             <strong>Income</strong><span>${state.score.income}</span>
@@ -708,16 +714,13 @@
           <p class="stage-label">Result</p>
           <h1>${result.headline}</h1>
           <p>${result.description}</p>
-          <div class="summary">
-            <p><strong>Main result:</strong> ${result.main}</p>
-            <p><strong>Overall score:</strong> ${state.score.overall}</p>
-            <p><strong>Food Waste score:</strong> ${state.score.foodWaste}</p>
-            <p><strong>Emissions score:</strong> ${state.score.emissions}</p>
-            <p><strong>Income score:</strong> ${state.score.income}</p>
-          </div>
-          <h2>Impact messages</h2>
           ${impactMarkup}
-          <details open>
+          <details>
+            <summary>What many don't know</summary>
+            <p>Fresh produce, like tomatoes, can go to waste while it grows. But the risk of food waste is also big after harvest, for example during storage and transport.</p>
+            <p>Here, even simple solutions like stackable crates can help reduce food waste, because you avoid the food getting squashed and damaged on its way to the market. Solar-powered cooling solutions can also help, as they can prevent food from spoiling in the heat.</p>
+          </details>
+          <details>
             <summary>Show full score history</summary>
             ${fullHistory}
           </details>

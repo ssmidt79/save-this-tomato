@@ -557,34 +557,39 @@
         if (state.earlyExit && state.resultType === "compost") {
           return {
             main: "Balanced",
-            headline: "Good save! Your tomato ended up as compost!"
+            headline: "Good save! Your tomato ended up as compost!",
+            description: "Let's take a closer look at some of your moves:"
           };
         }
 
         if (state.earlyExit && state.resultType === "landfill") {
           return {
             main: "Worst",
-            headline: "Ouch! Your tomato ended up in a landfill!"
+            headline: "Ouch! Your tomato ended up in a landfill!",
+            description: "Let's take a closer look at some of your moves:"
           };
         }
 
         if (state.score.overall >= 8) {
           return {
             main: "Best",
-            headline: "Best result! Your tomato made it through."
+            headline: "Well done! You saved the tomato!",
+            description: "That was just excellent. Let's take a closer look at some of your moves:"
           };
         }
 
         if (state.score.overall >= 5) {
           return {
             main: "Balanced",
-            headline: "Balanced result. Your tomato survived with mixed impacts."
+            headline: "Good job! You saved the tomato!",
+            description: "Overall, you did well. Let's take a closer look at some of your moves:"
           };
         }
 
         return {
           main: "Worst",
-          headline: "Worst result. Your tomato journey had too many risks."
+          headline: "Phew! You saved the tomato!",
+          description: "But it was a close call. Let's take a closer look at some of your moves:"
         };
       }
 
@@ -702,6 +707,7 @@
         app.innerHTML = `
           <p class="stage-label">Result</p>
           <h1>${result.headline}</h1>
+          <p>${result.description}</p>
           <div class="summary">
             <p><strong>Main result:</strong> ${result.main}</p>
             <p><strong>Overall score:</strong> ${state.score.overall}</p>

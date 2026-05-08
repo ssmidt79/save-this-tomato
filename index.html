@@ -664,9 +664,8 @@
       function renderFeedback() {
         const feedback = state.pendingFeedback;
         app.innerHTML = `
-          <p class="stage-label">Answer</p>
-          <h1>${feedback.stage}</h1>
-          <p class="response">${feedback.response}</p>
+          <p class="stage-label">${feedback.stage} - Answer</p>
+          <h1>${feedback.response}</h1>
           <details>
             <summary>Points</summary>
             <p><strong>Selected answer:</strong> ${feedback.answer}</p>

@@ -26,8 +26,8 @@
         width: 100%;
         border: 2px solid #000;
         border-radius: 0;
-        background: #fff;
-        color: #000;
+        background: #000;
+        color: #fff;
         padding: 18px 14px;
         font: inherit;
         font-size: 18px;
@@ -37,20 +37,19 @@
       }
 
       button:active {
-        background: #eee;
+        background: #333;
       }
 
       .debug-panel {
-        position: fixed;
+        position: sticky;
         top: 0;
-        left: 50%;
         z-index: 10;
         width: min(100%, 393px);
         max-height: 245px;
         overflow: auto;
-        transform: translateX(-50%);
         border-bottom: 3px solid #000;
-        background: #fff;
+        background: #eee;
+        margin: 0 auto;
         padding: 10px 12px;
         font-size: 13px;
         line-height: 1.35;
@@ -58,6 +57,13 @@
 
       .debug-title {
         margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .debug-panel summary {
+        cursor: pointer;
         font-size: 14px;
         font-weight: 800;
         text-transform: uppercase;
@@ -88,7 +94,7 @@
         width: min(100%, 393px);
         min-height: 100vh;
         margin: 0 auto;
-        padding: 270px 18px 28px;
+        padding: 28px 18px 28px;
       }
 
       .stage-label {
@@ -128,10 +134,17 @@
         gap: 12px;
       }
 
-      .summary {
+      .summary,
+      details {
         border: 2px solid #000;
-        padding: 14px;
         margin: 18px 0;
+        padding: 12px;
+      }
+
+      .result-separator {
+        border: 0;
+        border-top: 2px solid #000;
+        margin: 22px 0;
       }
 
       .response {
@@ -152,12 +165,6 @@
         margin-bottom: 10px;
         font-size: 15px;
         line-height: 1.35;
-      }
-
-      details {
-        border: 2px solid #000;
-        margin: 20px 0;
-        padding: 12px;
       }
 
       summary {
@@ -191,8 +198,10 @@
   </head>
   <body>
     <aside class="debug-panel" aria-live="polite">
-      <p class="debug-title">Debug score panel</p>
-      <div id="debugPanel"></div>
+      <details id="debugDetails">
+        <summary>Debug score panel</summary>
+        <div id="debugPanel"></div>
+      </details>
     </aside>
 
     <main id="app" class="app"></main>
@@ -440,7 +449,8 @@
         history: [],
         pendingFeedback: null,
         earlyExit: false,
-        resultType: null
+        resultType: null,
+        answerOrders: []
       };
 
       let state = structuredClone(initialState);
@@ -627,13 +637,19 @@
 
       function renderStage() {
         const stage = stages[state.stageIndex];
+        if (!state.answerOrders[state.stageIndex]) {
+          const firstTwo = [0, 1].sort(() => Math.random() - 0.5);
+          state.answerOrders[state.stageIndex] = [...firstTwo, 2];
+        }
+        const answerOrder = state.answerOrders[state.stageIndex];
+
         app.innerHTML = `
           <p class="stage-label">${stage.title}</p>
           <h1>Save This Tomato</h1>
           <p class="question">${stage.question}</p>
           <div class="answers">
-            ${stage.answers.map((answer, index) => `
-              <button type="button" data-answer="${index}">${answer.label}</button>
+            ${answerOrder.map((answerIndex) => `
+              <button type="button" data-answer="${answerIndex}">${stage.answers[answerIndex].label}</button>
             `).join("")}
           </div>
         `;
@@ -651,14 +667,15 @@
           <p class="stage-label">Answer</p>
           <h1>${feedback.stage}</h1>
           <p class="response">${feedback.response}</p>
-          <div class="summary">
+          <details>
+            <summary>Points</summary>
             <p><strong>Selected answer:</strong> ${feedback.answer}</p>
             <p><strong>Overall points added:</strong> ${formatPoints(feedback.overall)}</p>
             <p><strong>Impact points added:</strong></p>
             <p>Food Waste ${formatPoints(feedback.impact.foodWaste)}</p>
             <p>Emissions ${formatPoints(feedback.impact.emissions)}</p>
             <p>Income ${formatPoints(feedback.impact.income)}</p>
-          </div>
+          </details>
           <div class="actions">
             <button type="button" id="nextButton">${feedback.resultType ? "See result" : feedback.earlyExit ? "Go to Last Save" : "Next stage"}</button>
           </div>
@@ -720,6 +737,7 @@
             <p>Fresh produce, like tomatoes, can go to waste while it grows. But the risk of food waste is also big after harvest, for example during storage and transport.</p>
             <p>Here, even simple solutions like stackable crates can help reduce food waste, because you avoid the food getting squashed and damaged on its way to the market. Solar-powered cooling solutions can also help, as they can prevent food from spoiling in the heat.</p>
           </details>
+          <hr class="result-separator">
           <details>
             <summary>Show full score history</summary>
             ${fullHistory}

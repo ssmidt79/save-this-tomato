@@ -147,6 +147,12 @@
         margin: 22px 0;
       }
 
+      .result-bottom {
+        background: #eee;
+        margin: 22px -18px -28px;
+        padding: 18px;
+      }
+
       .response {
         font-weight: 800;
       }
@@ -171,6 +177,20 @@
         cursor: pointer;
         font-size: 18px;
         font-weight: 800;
+      }
+
+      .impact-learn-more {
+        border: 0;
+        margin: -6px 0 22px 0;
+        padding: 0;
+      }
+
+      .impact-learn-more summary {
+        font-size: 18px;
+      }
+
+      .impact-learn-more p {
+        margin-top: 12px;
       }
 
       .actions {
@@ -436,6 +456,21 @@
         }
       };
 
+      const impactLearnMore = {
+        foodWaste: [
+          "Fresh produce, like tomatoes, can go to waste while it grows. But the risk of food waste is also big after harvest, for example during storage and transport.",
+          "Here, even simple solutions like stackable crates can help reduce food waste, because you avoid the food getting squashed and damaged on its way to the market. Solar-powered cooling solutions can also help, as they can prevent food from spoiling in the heat."
+        ],
+        emissions: [
+          "Food waste itself can cause greenhouse gases when it rots in a landfill. That's why it's key to avoid food waste in the first place. When food spoils or isn't safe to eat, composting it is a more climate-friendly option. Maybe you're already doing this at home or in your local community!",
+          "Greenhouse gases can also come from using things like chemical fertiliser, as well as pumps, vans, and trucks that run on diesel and gasoline. So, ensuring farmers have access to renewable energy, electric transport and training in eco-friendly farming can also help lower emissions a lot."
+        ],
+        income: [
+          "Finding a place to sell the things you grow isn't always easy for small farmers. Setting up produce hubs can help, because then farmers can get together, bulk their crops and sell at a better price. Helping farmers connect with local shops and supermarkets is also a good solution. That means shorter travel distances and a lower risk of food waste and pollution.",
+          "Another thing to keep in mind is that small farmers' incomes are affected by a lot of things. Money for fertiliser and water is not always available, which can make it harder to grow crops and earn money. That's why access to a small business loan can help."
+        ]
+      };
+
       const initialState = {
         screen: "stage",
         stageIndex: 0,
@@ -667,7 +702,7 @@
           <p class="stage-label">${feedback.stage} - Answer</p>
           <h1>${feedback.response}</h1>
           <details>
-            <summary>Points</summary>
+            <summary>Behind the points</summary>
             <p><strong>Selected answer:</strong> ${feedback.answer}</p>
             <p><strong>Overall points added:</strong> ${formatPoints(feedback.overall)}</p>
             <p><strong>Impact points added:</strong></p>
@@ -706,7 +741,13 @@
         const result = getResult();
         const impactMarkup = Object.entries(impactMessages).map(([key, message]) => {
           const tone = impactTone(state.score[key]);
-          return `<p><strong>${message.label}:</strong> ${message[tone]}</p>`;
+          return `
+            <p><strong>${message.label}:</strong> ${message[tone]}</p>
+            <details class="impact-learn-more">
+              <summary>What many don't know</summary>
+              ${impactLearnMore[key].map((paragraph) => `<p>${paragraph}</p>`).join("")}
+            </details>
+          `;
         }).join("");
 
         const fullHistory = state.history.length
@@ -731,18 +772,15 @@
           <h1>${result.headline}</h1>
           <p>${result.description}</p>
           ${impactMarkup}
-          <details>
-            <summary>What many don't know</summary>
-            <p>Fresh produce, like tomatoes, can go to waste while it grows. But the risk of food waste is also big after harvest, for example during storage and transport.</p>
-            <p>Here, even simple solutions like stackable crates can help reduce food waste, because you avoid the food getting squashed and damaged on its way to the market. Solar-powered cooling solutions can also help, as they can prevent food from spoiling in the heat.</p>
-          </details>
           <hr class="result-separator">
-          <details>
-            <summary>Show full score history</summary>
-            ${fullHistory}
-          </details>
-          <div class="actions">
-            <button type="button" id="resetButton">Reset</button>
+          <div class="result-bottom">
+            <details>
+              <summary>Show full score history</summary>
+              ${fullHistory}
+            </details>
+            <div class="actions">
+              <button type="button" id="resetButton">Play again</button>
+            </div>
           </div>
         `;
 

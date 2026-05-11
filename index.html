@@ -47,7 +47,6 @@
         width: min(100%, 393px);
         max-height: 245px;
         overflow: auto;
-        border-bottom: 3px solid #000;
         background: #eee;
         margin: 0 auto;
         padding: 10px 12px;
@@ -67,6 +66,12 @@
         font-size: 14px;
         font-weight: 800;
         text-transform: uppercase;
+      }
+
+      .debug-panel details {
+        border: 0;
+        margin: 0;
+        padding: 0;
       }
 
       .score-grid {
@@ -191,6 +196,18 @@
 
       .impact-learn-more p {
         margin-top: 12px;
+      }
+
+      .answer-score-details {
+        border: 0;
+        margin: 18px 0;
+        padding: 0;
+      }
+
+      .score-history-details {
+        border: 0;
+        margin: 18px 0;
+        padding: 0;
       }
 
       .actions {
@@ -701,8 +718,8 @@
         app.innerHTML = `
           <p class="stage-label">${feedback.stage} - Answer</p>
           <h1>${feedback.response}</h1>
-          <details>
-            <summary>Behind the points</summary>
+          <details class="answer-score-details">
+            <summary>Debug this score</summary>
             <p><strong>Selected answer:</strong> ${feedback.answer}</p>
             <p><strong>Overall points added:</strong> ${formatPoints(feedback.overall)}</p>
             <p><strong>Impact points added:</strong></p>
@@ -774,7 +791,7 @@
           ${impactMarkup}
           <hr class="result-separator">
           <div class="result-bottom">
-            <details>
+            <details class="score-history-details">
               <summary>Show full score history</summary>
               ${fullHistory}
             </details>

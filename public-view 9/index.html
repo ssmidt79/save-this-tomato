@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Save This Tomato Prototype</title>
+    <style>
+      :root {
+        color: #000;
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #fff;
+        color: #000;
+      }
+
+      button {
+        width: 100%;
+        border: 2px solid #000;
+        border-radius: 0;
+        background: #000;
+        color: #fff;
+        padding: 18px 14px;
+        font: inherit;
+        font-size: 18px;
+        font-weight: 700;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      button:active {
+        background: #333;
+      }
+
+      .debug-panel {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        width: min(100%, 393px);
+        max-height: 245px;
+        overflow: auto;
+        border-bottom: 3px solid #000;
+        background: #eee;
+        margin: 0 auto;
+        padding: 10px 12px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .debug-title {
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .debug-panel summary {
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .score-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 12px;
+      }
+
+      .debug-history {
+        margin-top: 8px;
+        border-top: 1px solid #000;
+        padding-top: 8px;
+      }
+
+      .debug-history ol {
+        margin: 4px 0 0 18px;
+        padding: 0;
+      }
+
+      .debug-history li {
+        margin-bottom: 3px;
+      }
+
+      .app {
+        width: min(100%, 393px);
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: 28px 18px 28px;
+      }
+
+      .stage-label {
+        margin: 0 0 10px;
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0 0 20px;
+        font-size: 30px;
+        line-height: 1.05;
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        font-size: 24px;
+        line-height: 1.15;
+      }
+
+      p {
+        margin: 0 0 16px;
+        font-size: 18px;
+        line-height: 1.35;
+      }
+
+      .question {
+        margin-bottom: 24px;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+
+      .answers {
+        display: grid;
+        gap: 12px;
+      }
+
+      .summary,
+      details {
+        border: 2px solid #000;
+        margin: 18px 0;
+        padding: 12px;
+      }
+
+      .result-separator {
+        border: 0;
+        border-top: 2px solid #000;
+        margin: 22px 0;
+      }
+
+      .result-bottom {
+        background: #eee;
+        margin: 22px -18px -28px;
+        padding: 18px;
+      }
+
+      .response {
+        font-weight: 800;
+      }
+
+      .summary p {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      .history-list {
+        margin: 12px 0 20px 20px;
+        padding: 0;
+      }
+
+      .history-list li {
+        margin-bottom: 10px;
+        font-size: 15px;
+        line-height: 1.35;
+      }
+
+      summary {
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .impact-learn-more {
+        border: 0;
+        margin: -6px 0 22px 0;
+        padding: 0;
+      }
+
+      .impact-learn-more summary {
+        font-size: 18px;
+      }
+
+      .impact-learn-more p {
+        margin-top: 12px;
+      }
+
+      .actions {
+        display: grid;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      @media (min-width: 600px) {
+        body {
+          background: #f5f5f5;
+        }
+
+        .app,
+        .debug-panel {
+          border-left: 1px solid #ddd;
+          border-right: 1px solid #ddd;
+        }
+
+        .app {
+          background: #fff;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="debug-panel" aria-live="polite">
+      <details id="debugDetails">
+        <summary>Debug score panel</summary>
+        <div id="debugPanel"></div>
+      </details>
+    </aside>
+
+    <main id="app" class="app"></main>
+
+    <script>
+      const stages = [
+        {
+          id: "soil",
+          title: "Stage 1 - Soil",
+          question: "Your tomato isn't growing. How will you save it?",
+          answers: [
+            {
+              label: "Plant a helper crop",
+              overall: 2,
+              impact: { foodWaste: 1, emissions: 1, income: 1 },
+              response: "Good choice! A helper crop can boost tomato growth."
+            },
+            {
+              label: "Use chemical fertilisers",
+              overall: 0,
+              impact: { foodWaste: 0, emissions: -2, income: 1 },
+              response: "Ouch! Chemical fertilisers can harm the soil and cause greenhouse gas emissions."
+            },
+            {
+              label: "Take a chance",
+              outcomes: [
+                {
+                  label: "Solar-powered watering",
+                  overall: 1,
+                  impact: { foodWaste: 1, emissions: 2, income: 1 },
+                  response: "Nice! Solar-powered watering can help your tomato grow."
+                },
+                {
+                  label: "Business loan",
+                  overall: 1,
+                  impact: { foodWaste: 1, emissions: 1, income: 2 },
+                  response: "Nice! A business loan can help farmers invest in better solutions."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "water",
+          title: "Stage 2 - Water",
+          question: "There's a drought. How will you save your tomato?",
+          answers: [
+            {
+              label: "Cover the soil",
+              overall: 2,
+              impact: { foodWaste: 1, emissions: 1, income: 1 },
+              response: "Great choice! Covering the soil can reduce water loss and help keep your tomato healthy."
+            },
+            {
+              label: "Pump groundwater",
+              overall: 0,
+              impact: { foodWaste: -1, emissions: -1, income: 0 },
+              response: "Ouch! Pumping can lower water levels and often uses fossil energy."
+            },
+            {
+              label: "Take a chance",
+              outcomes: [
+                {
+                  label: "Solar-powered watering",
+                  overall: 1,
+                  impact: { foodWaste: 1, emissions: 2, income: 1 },
+                  response: "Nice! Solar-powered watering can help your tomato grow."
+                },
+                {
+                  label: "Polluted drainage water",
+                  overall: 0,
+                  impact: { foodWaste: -3, emissions: -1, income: -2 },
+                  earlyExit: true,
+                  response: "Bad luck! Your tomato was watered with polluted drainage water. Now it's not safe to eat."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "storage",
+          title: "Stage 3 - Storage",
+          question: "It's hot out there. Where will you store your tomato?",
+          answers: [
+            {
+              label: "Cool box",
+              overall: 2,
+              impact: { foodWaste: 2, emissions: 1, income: 1 },
+              response: "Good choice! A cool box can keep your tomato from spoiling."
+            },
+            {
+              label: "Large basket",
+              overall: 0,
+              impact: { foodWaste: -2, emissions: 0, income: -1 },
+              response: "Ouch! Your tomato might get squashed when baskets are piled on top of each other."
+            },
+            {
+              label: "Take a chance",
+              outcomes: [
+                {
+                  label: "Stackable crates",
+                  overall: 1,
+                  impact: { foodWaste: 2, emissions: 0, income: 1 },
+                  response: "Nice! Stackable crates can protect the tomato from getting squashed."
+                },
+                {
+                  label: "Tomato spoiled in the sun",
+                  overall: 0,
+                  impact: { foodWaste: -3, emissions: -1, income: -2 },
+                  earlyExit: true,
+                  response: "Bad luck! You stored the tomato outside, and it spoiled in the sun."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "transport",
+          title: "Stage 4 - Transport",
+          question: "Ready to go! How will you transport your tomato to the market?",
+          answers: [
+            {
+              label: "Cooling truck",
+              overall: 2,
+              impact: { foodWaste: 2, emissions: -1, income: 1 },
+              response: "Good choice! A cooling truck can keep your tomato from spoiling, but it may still use energy."
+            },
+            {
+              label: "Diesel truck",
+              overall: 0,
+              impact: { foodWaste: 0, emissions: -2, income: 0 },
+              response: "Ouch! Diesel transport increases greenhouse gas emissions."
+            },
+            {
+              label: "Take a chance",
+              outcomes: [
+                {
+                  label: "Electric truck",
+                  overall: 1,
+                  impact: { foodWaste: 1, emissions: 2, income: 1 },
+                  response: "Nice! Your tomato got a lift in an electric truck."
+                },
+                {
+                  label: "Truck broke down",
+                  overall: 0,
+                  impact: { foodWaste: -3, emissions: -1, income: -2 },
+                  earlyExit: true,
+                  response: "Bad luck! Your truck broke down, and your tomato spoiled on the way."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "market",
+          title: "Stage 5 - Market",
+          question: "Time to find a buyer! Who will you sell your tomato to?",
+          answers: [
+            {
+              label: "Sell locally",
+              overall: 2,
+              impact: { foodWaste: 1, emissions: 2, income: 2 },
+              response: "Great choice! Selling locally can reduce transport and help farmers earn from their crops."
+            },
+            {
+              label: "Export far away",
+              overall: 0,
+              impact: { foodWaste: 0, emissions: -2, income: 2 },
+              response: "Mixed choice. Exporting can create income, but transport over long distances increases emissions."
+            },
+            {
+              label: "Take a chance",
+              outcomes: [
+                {
+                  label: "Strong market demand",
+                  overall: 1,
+                  impact: { foodWaste: 1, emissions: 0, income: 2 },
+                  response: "Nice! Strong demand means your tomato can be sold quickly."
+                },
+                {
+                  label: "Tomato not sold",
+                  overall: 0,
+                  impact: { foodWaste: -3, emissions: -1, income: -3 },
+                  earlyExit: true,
+                  response: "Bad luck! Your tomato was not sold."
+                }
+              ]
+            }
+          ]
+        }
+      ];
+
+      const lastSave = {
+        title: "Last Save",
+        question: "Your tomato can't be eaten. What will you do with it?",
+        answers: [
+          {
+            label: "Compost the tomato",
+            resultType: "compost",
+            overall: 0,
+            impact: { foodWaste: 1, emissions: 1, income: 0 },
+            response: "Good save! Composting can turn the tomato into bio-friendly fertiliser."
+          },
+          {
+            label: "Send the tomato to landfill",
+            resultType: "landfill",
+            overall: 0,
+            impact: { foodWaste: -2, emissions: -3, income: 0 },
+            response: "Ouch! When the tomato rots in landfill, it can emit methane."
+          }
+        ]
+      };
+
+      const impactMessages = {
+        foodWaste: {
+          label: "Food Waste",
+          positive: "Your choices helped prevent food waste and kept the tomato useful for longer.",
+          neutral: "Some choices helped reduce food waste, while others still created risks.",
+          negative: "Some choices increased the risk of the tomato going to waste."
+        },
+        emissions: {
+          label: "Emissions",
+          positive: "Your choices helped reduce greenhouse gas emissions.",
+          neutral: "Some choices lowered emissions, while others still added climate impact.",
+          negative: "Some choices increased greenhouse gas emissions."
+        },
+        income: {
+          label: "Income",
+          positive: "Your choices helped farmers earn more from their crops.",
+          neutral: "Some choices improved income opportunities, but not all decisions supported farmers.",
+          negative: "Some choices made it harder for farmers to earn income from the tomato."
+        }
+      };
+
+      const impactLearnMore = {
+        foodWaste: [
+          "Fresh produce, like tomatoes, can go to waste while it grows. But the risk of food waste is also big after harvest, for example during storage and transport.",
+          "Here, even simple solutions like stackable crates can help reduce food waste, because you avoid the food getting squashed and damaged on its way to the market. Solar-powered cooling solutions can also help, as they can prevent food from spoiling in the heat."
+        ],
+        emissions: [
+          "Food waste itself can cause greenhouse gases when it rots in a landfill. That's why it's key to avoid food waste in the first place. When food spoils or isn't safe to eat, composting it is a more climate-friendly option. Maybe you're already doing this at home or in your local community!",
+          "Greenhouse gases can also come from using things like chemical fertiliser, as well as pumps, vans, and trucks that run on diesel and gasoline. So, ensuring farmers have access to renewable energy, electric transport and training in eco-friendly farming can also help lower emissions a lot."
+        ],
+        income: [
+          "Finding a place to sell the things you grow isn't always easy for small farmers. Setting up produce hubs can help, because then farmers can get together, bulk their crops and sell at a better price. Helping farmers connect with local shops and supermarkets is also a good solution. That means shorter travel distances and a lower risk of food waste and pollution.",
+          "Another thing to keep in mind is that small farmers' incomes are affected by a lot of things. Money for fertiliser and water is not always available, which can make it harder to grow crops and earn money. That's why access to a small business loan can help."
+        ]
+      };
+
+      const initialState = {
+        screen: "stage",
+        stageIndex: 0,
+        currentStage: "Stage 1 - Soil",
+        score: {
+          overall: 0,
+          foodWaste: 0,
+          emissions: 0,
+          income: 0
+        },
+        history: [],
+        pendingFeedback: null,
+        earlyExit: false,
+        resultType: null,
+        answerOrders: []
+      };
+
+      let state = structuredClone(initialState);
+
+      const app = document.querySelector("#app");
+      const debugPanel = document.querySelector("#debugPanel");
+
+      function formatPoints(value) {
+        return value > 0 ? `+${value}` : `${value}`;
+      }
+
+      function resolveAnswer(answer) {
+        if (!answer.outcomes) {
+          return { ...answer, chosenLabel: answer.label };
+        }
+
+        const randomOutcome = answer.outcomes[Math.floor(Math.random() * answer.outcomes.length)];
+        return {
+          ...randomOutcome,
+          chosenLabel: `${answer.label}: ${randomOutcome.label}`,
+          originalLabel: answer.label
+        };
+      }
+
+      function applyAnswer(stageTitle, answer) {
+        const scoreBefore = { ...state.score };
+
+        state.score.overall += answer.overall || 0;
+        state.score.foodWaste += answer.impact.foodWaste;
+        state.score.emissions += answer.impact.emissions;
+        state.score.income += answer.impact.income;
+
+        const entry = {
+          stage: stageTitle,
+          answer: answer.chosenLabel,
+          overall: answer.overall || 0,
+          impact: { ...answer.impact },
+          response: answer.response,
+          scoreBefore,
+          scoreAfter: { ...state.score },
+          earlyExit: Boolean(answer.earlyExit),
+          resultType: answer.resultType || null
+        };
+
+        state.history.push(entry);
+        state.pendingFeedback = entry;
+        state.screen = "feedback";
+
+        if (answer.earlyExit) {
+          state.earlyExit = true;
+          state.currentStage = "Feedback - Early exit";
+        } else if (answer.resultType) {
+          state.resultType = answer.resultType;
+          state.currentStage = "Feedback - Last Save";
+        } else {
+          state.currentStage = `Feedback - ${stageTitle}`;
+        }
+
+        console.log("Score update", {
+          stage: stageTitle,
+          selectedAnswer: answer.chosenLabel,
+          added: {
+            overall: answer.overall || 0,
+            ...answer.impact
+          },
+          scoreBefore,
+          scoreAfter: { ...state.score },
+          history: state.history.map((item) => item.answer)
+        });
+
+        render();
+      }
+
+      function selectStageAnswer(answer) {
+        const stage = stages[state.stageIndex];
+        applyAnswer(stage.title, resolveAnswer(answer));
+      }
+
+      function selectLastSaveAnswer(answer) {
+        applyAnswer(lastSave.title, { ...answer, chosenLabel: answer.label });
+      }
+
+      function goNext() {
+        if (state.pendingFeedback?.earlyExit) {
+          state.screen = "lastSave";
+          state.currentStage = "Last Save";
+          state.pendingFeedback = null;
+        } else if (state.pendingFeedback?.resultType) {
+          state.screen = "result";
+          state.currentStage = "Result";
+          state.pendingFeedback = null;
+        } else if (state.stageIndex >= stages.length - 1) {
+          state.screen = "result";
+          state.currentStage = "Result";
+          state.pendingFeedback = null;
+        } else {
+          state.stageIndex += 1;
+          state.screen = "stage";
+          state.currentStage = stages[state.stageIndex].title;
+          state.pendingFeedback = null;
+        }
+
+        render();
+      }
+
+      function resetGame() {
+        state = structuredClone(initialState);
+        console.clear();
+        console.log("Game reset", { score: state.score });
+        render();
+      }
+
+      function getResult() {
+        if (state.earlyExit && state.resultType === "compost") {
+          return {
+            main: "Balanced",
+            headline: "Good save! Your tomato ended up as compost!",
+            description: "Let's take a closer look at some of your moves:"
+          };
+        }
+
+        if (state.earlyExit && state.resultType === "landfill") {
+          return {
+            main: "Worst",
+            headline: "Ouch! Your tomato ended up in a landfill!",
+            description: "Let's take a closer look at some of your moves:"
+          };
+        }
+
+        if (state.score.overall >= 8) {
+          return {
+            main: "Best",
+            headline: "Well done! You saved the tomato!",
+            description: "That was just excellent. Let's take a closer look at some of your moves:"
+          };
+        }
+
+        if (state.score.overall >= 5) {
+          return {
+            main: "Balanced",
+            headline: "Good job! You saved the tomato!",
+            description: "Overall, you did well. Let's take a closer look at some of your moves:"
+          };
+        }
+
+        return {
+          main: "Worst",
+          headline: "Phew! You saved the tomato!",
+          description: "But it was a close call. Let's take a closer look at some of your moves:"
+        };
+      }
+
+      function impactTone(score) {
+        if (score >= 3) return "positive";
+        if (score >= 1) return "neutral";
+        return "negative";
+      }
+
+      function overallBandLabel() {
+        if (state.score.overall >= 8) return "Best";
+        if (state.score.overall >= 5) return "Balanced";
+        return "Worst";
+      }
+
+      function renderDebug() {
+        const historyMarkup = state.history.length
+          ? `<ol>${state.history.map((item) => `<li>${item.stage}: ${item.answer}</li>`).join("")}</ol>`
+          : "<p>No answers yet.</p>";
+
+        debugPanel.innerHTML = `
+          <div class="score-grid">
+            <strong>Overall</strong><span>${state.score.overall} (${overallBandLabel()})</span>
+            <strong>Food Waste</strong><span>${state.score.foodWaste}</span>
+            <strong>Emissions</strong><span>${state.score.emissions}</span>
+            <strong>Income</strong><span>${state.score.income}</span>
+            <strong>Current stage</strong><span>${state.currentStage}</span>
+          </div>
+          <div class="debug-history">
+            <strong>Selected answers history</strong>
+            ${historyMarkup}
+          </div>
+        `;
+      }
+
+      function renderStage() {
+        const stage = stages[state.stageIndex];
+        if (!state.answerOrders[state.stageIndex]) {
+          const firstTwo = [0, 1].sort(() => Math.random() - 0.5);
+          state.answerOrders[state.stageIndex] = [...firstTwo, 2];
+        }
+        const answerOrder = state.answerOrders[state.stageIndex];
+
+        app.innerHTML = `
+          <p class="stage-label">${stage.title}</p>
+          <h1>Save This Tomato</h1>
+          <p class="question">${stage.question}</p>
+          <div class="answers">
+            ${answerOrder.map((answerIndex) => `
+              <button type="button" data-answer="${answerIndex}">${stage.answers[answerIndex].label}</button>
+            `).join("")}
+          </div>
+        `;
+
+        app.querySelectorAll("[data-answer]").forEach((button) => {
+          button.addEventListener("click", () => {
+            selectStageAnswer(stage.answers[Number(button.dataset.answer)]);
+          });
+        });
+      }
+
+      function renderFeedback() {
+        const feedback = state.pendingFeedback;
+        app.innerHTML = `
+          <p class="stage-label">${feedback.stage} - Answer</p>
+          <h1>${feedback.response}</h1>
+          <details>
+            <summary>Behind the points</summary>
+            <p><strong>Selected answer:</strong> ${feedback.answer}</p>
+            <p><strong>Overall points added:</strong> ${formatPoints(feedback.overall)}</p>
+            <p><strong>Impact points added:</strong></p>
+            <p>Food Waste ${formatPoints(feedback.impact.foodWaste)}</p>
+            <p>Emissions ${formatPoints(feedback.impact.emissions)}</p>
+            <p>Income ${formatPoints(feedback.impact.income)}</p>
+          </details>
+          <div class="actions">
+            <button type="button" id="nextButton">${feedback.resultType ? "See result" : feedback.earlyExit ? "Go to Last Save" : "Next stage"}</button>
+          </div>
+        `;
+
+        app.querySelector("#nextButton").addEventListener("click", goNext);
+      }
+
+      function renderLastSave() {
+        app.innerHTML = `
+          <p class="stage-label">${lastSave.title}</p>
+          <h1>Save This Tomato</h1>
+          <p class="question">${lastSave.question}</p>
+          <div class="answers">
+            ${lastSave.answers.map((answer, index) => `
+              <button type="button" data-answer="${index}">${answer.label}</button>
+            `).join("")}
+          </div>
+        `;
+
+        app.querySelectorAll("[data-answer]").forEach((button) => {
+          button.addEventListener("click", () => {
+            selectLastSaveAnswer(lastSave.answers[Number(button.dataset.answer)]);
+          });
+        });
+      }
+
+      function renderResult() {
+        const result = getResult();
+        const impactMarkup = Object.entries(impactMessages).map(([key, message]) => {
+          const tone = impactTone(state.score[key]);
+          return `
+            <p><strong>${message.label}:</strong> ${message[tone]}</p>
+            <details class="impact-learn-more">
+              <summary>What many don't know</summary>
+              ${impactLearnMore[key].map((paragraph) => `<p>${paragraph}</p>`).join("")}
+            </details>
+          `;
+        }).join("");
+
+        const fullHistory = state.history.length
+          ? `<ol class="history-list">${state.history.map((item) => `
+              <li>
+                <strong>${item.stage}</strong><br>
+                ${item.answer}<br>
+                Overall ${formatPoints(item.overall)};
+                Food Waste ${formatPoints(item.impact.foodWaste)};
+                Emissions ${formatPoints(item.impact.emissions)};
+                Income ${formatPoints(item.impact.income)}<br>
+                Running score: Overall ${item.scoreAfter.overall},
+                Food Waste ${item.scoreAfter.foodWaste},
+                Emissions ${item.scoreAfter.emissions},
+                Income ${item.scoreAfter.income}
+              </li>
+            `).join("")}</ol>`
+          : "<p>No score history.</p>";
+
+        app.innerHTML = `
+          <p class="stage-label">Result</p>
+          <h1>${result.headline}</h1>
+          <p>${result.description}</p>
+          ${impactMarkup}
+          <hr class="result-separator">
+          <div class="result-bottom">
+            <details>
+              <summary>Show full score history</summary>
+              ${fullHistory}
+            </details>
+            <div class="actions">
+              <button type="button" id="resetButton">Play again</button>
+            </div>
+          </div>
+        `;
+
+        app.querySelector("#resetButton").addEventListener("click", resetGame);
+      }
+
+      function render() {
+        renderDebug();
+
+        if (state.screen === "stage") renderStage();
+        if (state.screen === "feedback") renderFeedback();
+        if (state.screen === "lastSave") renderLastSave();
+        if (state.screen === "result") renderResult();
+      }
+
+      render();
+    </script>
+  </body>
+</html>

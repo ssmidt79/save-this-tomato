@@ -253,13 +253,13 @@
             {
               label: "Plant a helper crop",
               overall: 2,
-              impact: { foodWaste: 1, emissions: 1, income: 1 },
+              impact: { foodWaste: 1, emissions: 1, income: 0 },
               response: "Good choice! A helper crop can boost tomato growth."
             },
             {
               label: "Use chemical fertilisers",
               overall: 0,
-              impact: { foodWaste: 0, emissions: -2, income: 1 },
+              impact: { foodWaste: 0, emissions: -2, income: 0 },
               response: "Ouch! Chemical fertilisers can harm the soil and cause greenhouse gas emissions."
             },
             {
@@ -268,13 +268,13 @@
                 {
                   label: "Solar-powered watering",
                   overall: 1,
-                  impact: { foodWaste: 1, emissions: 2, income: 1 },
+                  impact: { foodWaste: 1, emissions: 2, income: 0 },
                   response: "Nice! Solar-powered watering can help your tomato grow."
                 },
                 {
                   label: "Business loan",
                   overall: 1,
-                  impact: { foodWaste: 1, emissions: 1, income: 2 },
+                  impact: { foodWaste: 1, emissions: 1, income: 0 },
                   response: "Nice! A business loan can help farmers invest in better solutions."
                 }
               ]
@@ -289,7 +289,7 @@
             {
               label: "Cover the soil",
               overall: 2,
-              impact: { foodWaste: 1, emissions: 1, income: 1 },
+              impact: { foodWaste: 1, emissions: 1, income: 0 },
               response: "Great choice! Covering the soil can reduce water loss and help keep your tomato healthy."
             },
             {
@@ -304,13 +304,13 @@
                 {
                   label: "Solar-powered watering",
                   overall: 1,
-                  impact: { foodWaste: 1, emissions: 2, income: 1 },
+                  impact: { foodWaste: 1, emissions: 2, income: 0 },
                   response: "Nice! Solar-powered watering can help your tomato grow."
                 },
                 {
                   label: "Polluted drainage water",
                   overall: 0,
-                  impact: { foodWaste: -3, emissions: -1, income: -2 },
+                  impact: { foodWaste: -3, emissions: -1, income: 0 },
                   earlyExit: true,
                   response: "Bad luck! Your tomato was watered with polluted drainage water. Now it's not safe to eat."
                 }
@@ -326,13 +326,13 @@
             {
               label: "Cool box",
               overall: 2,
-              impact: { foodWaste: 2, emissions: 1, income: 1 },
+              impact: { foodWaste: 2, emissions: 1, income: 0 },
               response: "Good choice! A cool box can keep your tomato from spoiling."
             },
             {
               label: "Large basket",
               overall: 0,
-              impact: { foodWaste: -2, emissions: 0, income: -1 },
+              impact: { foodWaste: -2, emissions: 0, income: 0 },
               response: "Ouch! Your tomato might get squashed when baskets are piled on top of each other."
             },
             {
@@ -341,13 +341,13 @@
                 {
                   label: "Stackable crates",
                   overall: 1,
-                  impact: { foodWaste: 2, emissions: 0, income: 1 },
+                  impact: { foodWaste: 2, emissions: 0, income: 0 },
                   response: "Nice! Stackable crates can protect the tomato from getting squashed."
                 },
                 {
                   label: "Tomato spoiled in the sun",
                   overall: 0,
-                  impact: { foodWaste: -3, emissions: -1, income: -2 },
+                  impact: { foodWaste: -3, emissions: -1, income: 0 },
                   earlyExit: true,
                   response: "Bad luck! You stored the tomato outside, and it spoiled in the sun."
                 }
@@ -363,7 +363,7 @@
             {
               label: "Cooling truck",
               overall: 2,
-              impact: { foodWaste: 2, emissions: -1, income: 1 },
+              impact: { foodWaste: 2, emissions: -1, income: 0 },
               response: "Good choice! A cooling truck can keep your tomato from spoiling, but it may still use energy."
             },
             {
@@ -378,13 +378,13 @@
                 {
                   label: "Electric truck",
                   overall: 1,
-                  impact: { foodWaste: 1, emissions: 2, income: 1 },
+                  impact: { foodWaste: 1, emissions: 2, income: 0 },
                   response: "Nice! Your tomato got a lift in an electric truck."
                 },
                 {
                   label: "Truck broke down",
                   overall: 0,
-                  impact: { foodWaste: -3, emissions: -1, income: -2 },
+                  impact: { foodWaste: -3, emissions: -1, income: 0 },
                   earlyExit: true,
                   response: "Bad luck! Your truck broke down, and your tomato spoiled on the way."
                 }
@@ -394,7 +394,7 @@
         },
         {
           id: "market",
-          title: "Stage 5 - Market",
+          title: "Stage 5 - Marketplace",
           question: "Time to find a buyer! Who will you sell your tomato to?",
           answers: [
             {
@@ -406,7 +406,7 @@
             {
               label: "Export far away",
               overall: 0,
-              impact: { foodWaste: 0, emissions: -2, income: 2 },
+              impact: { foodWaste: 0, emissions: -2, income: 0 },
               response: "Mixed choice. Exporting can create income, but transport over long distances increases emissions."
             },
             {
@@ -415,13 +415,13 @@
                 {
                   label: "Strong market demand",
                   overall: 1,
-                  impact: { foodWaste: 1, emissions: 0, income: 2 },
+                  impact: { foodWaste: 1, emissions: 0, income: 1 },
                   response: "Nice! Strong demand means your tomato can be sold quickly."
                 },
                 {
                   label: "Tomato not sold",
                   overall: 0,
-                  impact: { foodWaste: -3, emissions: -1, income: -3 },
+                  impact: { foodWaste: -3, emissions: -1, income: -2 },
                   earlyExit: true,
                   response: "Bad luck! Your tomato was not sold."
                 }
@@ -661,6 +661,12 @@
         return "negative";
       }
 
+      function incomeTone(score) {
+        if (score >= 2) return "positive";
+        if (score >= 0) return "neutral";
+        return "negative";
+      }
+
       function overallBandLabel() {
         if (state.score.overall >= 8) return "Best";
         if (state.score.overall >= 5) return "Balanced";
@@ -757,7 +763,7 @@
       function renderResult() {
         const result = getResult();
         const impactMarkup = Object.entries(impactMessages).map(([key, message]) => {
-          const tone = impactTone(state.score[key]);
+          const tone = key === "income" ? incomeTone(state.score.income) : impactTone(state.score[key]);
           return `
             <p><strong>${message.label}:</strong> ${message[tone]}</p>
             <details class="impact-learn-more">

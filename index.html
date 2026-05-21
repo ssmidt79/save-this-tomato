@@ -398,34 +398,28 @@
           question: "Time to find a buyer! Who will you sell your tomato to?",
           answers: [
             {
-              label: "Sell locally",
+              label: "Produce hub",
               overall: 2,
               impact: { foodWaste: 1, emissions: 2, income: 2 },
-              response: "Great choice! Selling locally can reduce transport and help farmers earn from their crops."
+              response: "Great choice! A produce hub can help farmers sell together and get a better price."
             },
             {
-              label: "Export far away",
+              label: "Local shop",
+              overall: 2,
+              impact: { foodWaste: 1, emissions: 2, income: 2 },
+              response: "Great choice! Selling to a local shop can reduce transport and help farmers earn from their crops."
+            },
+            {
+              label: "Local supermarket",
+              overall: 1,
+              impact: { foodWaste: 1, emissions: 1, income: 1 },
+              response: "Nice! Selling to a local supermarket means your tomato still finds a buyer."
+            },
+            {
+              label: "Bulk buyer",
               overall: 0,
-              impact: { foodWaste: 0, emissions: -2, income: 0 },
-              response: "Mixed choice. Exporting can create income, but transport over long distances increases emissions."
-            },
-            {
-              label: "Take a chance",
-              outcomes: [
-                {
-                  label: "Strong market demand",
-                  overall: 1,
-                  impact: { foodWaste: 1, emissions: 0, income: 1 },
-                  response: "Nice! Strong demand means your tomato can be sold quickly."
-                },
-                {
-                  label: "Tomato not sold",
-                  overall: 0,
-                  impact: { foodWaste: -3, emissions: -1, income: -2 },
-                  earlyExit: true,
-                  response: "Bad luck! Your tomato was not sold."
-                }
-              ]
+              impact: { foodWaste: 1, emissions: 0, income: -1 },
+              response: "Mixed choice. A bulk buyer means the tomato is sold, but the farmer may earn less."
             }
           ]
         }
@@ -696,8 +690,12 @@
       function renderStage() {
         const stage = stages[state.stageIndex];
         if (!state.answerOrders[state.stageIndex]) {
-          const firstTwo = [0, 1].sort(() => Math.random() - 0.5);
-          state.answerOrders[state.stageIndex] = [...firstTwo, 2];
+          if (stage.answers.length === 3 && stage.answers[2].outcomes) {
+            const firstTwo = [0, 1].sort(() => Math.random() - 0.5);
+            state.answerOrders[state.stageIndex] = [...firstTwo, 2];
+          } else {
+            state.answerOrders[state.stageIndex] = stage.answers.map((_, index) => index);
+          }
         }
         const answerOrder = state.answerOrders[state.stageIndex];
 
@@ -764,8 +762,12 @@
         const result = getResult();
         const impactMarkup = Object.entries(impactMessages).map(([key, message]) => {
           const tone = key === "income" ? incomeTone(state.score.income) : impactTone(state.score[key]);
+          const impactMessage = key === "income" && state.earlyExit
+            ? "You didn't get to sell your tomato."
+            : message[tone];
+
           return `
-            <p><strong>${message.label}:</strong> ${message[tone]}</p>
+            <p><strong>${message.label}:</strong> ${impactMessage}</p>
             <details class="impact-learn-more">
               <summary>What many don't know</summary>
               ${impactLearnMore[key].map((paragraph) => `<p>${paragraph}</p>`).join("")}
